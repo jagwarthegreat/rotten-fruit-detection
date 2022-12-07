@@ -16,14 +16,6 @@ Install the requirements
 pip install -r requirements.txt
 ```
 
-## Database Connection
-
-```bash
-in website/__init__.py edit SQLALCHEMY_DATABASE_URI value to your mysql connection
-mysqlConnection example = mysql://root@localhost/rottenfruit
-#NOTE: if you have password: mysql://user:password@host/database
-```
-
 ## Running The App
 
 ```bash
