@@ -8,6 +8,7 @@ class User(db.Model, UserMixin):
     fname = db.Column(db.String(150))
     mname = db.Column(db.String(150))
     lname = db.Column(db.String(150))
+    address = db.Column(db.String(150))
     username = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
     category = db.Column(db.String(150))
