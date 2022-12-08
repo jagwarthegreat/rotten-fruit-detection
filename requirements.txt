@@ -1,3 +1,6 @@
 flask
 Werkzeug
 flask-cors
+Flask-SQLAlchemy
+flask-mysqldb
+flask-login

@@ -10,6 +10,14 @@ def home():
     return jsonify({ "result": "this is home" })
     # return render_template("home.html", user=current_user)
 
+@views.route('/register', methods=['GET', 'POST'])
+def register():
+    return render_template("register.html")
+
+@views.route('/login', methods=['GET', 'POST'])
+def login():
+    return render_template("login.html")
+
 @views.route('/detect', methods=['GET','POST'])
 def detect():
     # requestData = json.loads(request.data)
@@ -29,4 +37,4 @@ def detect():
     #     ctStatus = "error"
 
     # flash('Document '+rmessage+'!', category=ctStatus)
-    return jsonify({ "result": "test detection result" })
+    return jsonify([{ "result": "test detection result" }])

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <div class="title">
+        <h4>Profile</h4>
+      </div>
+      <nav aria-label="breadcrumb" role="navigation">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="##">Dashboard</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Profile Page
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8 col-12">
+    <div class="card card-box">
+      <div class="card-header">Personal Info</div>
+      <div class="card-body">
+        <form class="form form-horizontal" method="POST" action="api/login">
+          <input type="hidden" value="" name="user_id">
+
+          <div class="row">
+            <div class="col-md-4">
+              <label>Username</label>
+            </div>
+            <div class="col-md-8 form-group">
+              <input type="text" class="form-control" name="username" placeholder="Username" value="">
+            </div>
+            <div class="col-md-4">
+              <label>Password</label>
+            </div>
+            <div class="col-md-8 form-group">
+              <input type="text" class="form-control" name="password" placeholder="Passewod" value="">
+            </div>
+            <div class="col-sm-12 d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary me-1 mb-1">Save Changes</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
