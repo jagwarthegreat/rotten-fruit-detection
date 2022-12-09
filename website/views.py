@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
+from flask_login import login_required, current_user
 import json
 from werkzeug.utils import secure_filename
 import os
@@ -7,16 +8,7 @@ views = Blueprint('views', __name__)
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
-    return jsonify({ "result": "this is home" })
-    # return render_template("home.html", user=current_user)
-
-@views.route('/register', methods=['GET', 'POST'])
-def register():
-    return render_template("register.html")
-
-@views.route('/login', methods=['GET', 'POST'])
-def login():
-    return render_template("login.html")
+    return render_template("home.html", user=current_user)
 
 @views.route('/detect', methods=['GET','POST'])
 def detect():

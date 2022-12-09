@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from os import path
 from flask_cors import CORS
+from flask_login import LoginManager
 from werkzeug.utils import secure_filename
 
 db = SQLAlchemy()
@@ -17,11 +19,21 @@ def create_app():
     db.init_app(app)
 
     from .views import views
+    from .auth import auth
     from .api import api
 
     app.register_blueprint(views, url_prefix='/')
+    app.register_blueprint(auth, url_prefix='/')
     app.register_blueprint(api, url_prefix='/api')
 
     from .models import User
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
 
     return app
