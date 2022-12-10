@@ -51,14 +51,16 @@ def apiRegister():
 
 @api.route('/getprofile', methods=['GET', 'POST'])
 def apiProfile():
-    documents = User.query.all()
-    return jsonify({
-        "first_name": documents[0].fname,
-        "middle_name": documents[0].mname,
-        "last_name": documents[0].lname,
-        "address": documents[0].address,
-        "username": documents[0].username,
-    })
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        user = User.query.filter_by(id=user_id).first()
+        return jsonify({
+            "first_name": user.fname,
+            "middle_name": user.mname,
+            "last_name": user.lname,
+            "address": user.address,
+            "username": user.username,
+        })
 
 @api.route('/password', methods=['GET', 'POST'])
 def apiPassword():
