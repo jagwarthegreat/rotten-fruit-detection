@@ -17,7 +17,7 @@ def apiLogin():
         user = User.query.filter_by(username=username).first()
         if user:
             if check_password_hash(user.password, password):
-                return jsonify({ "result": "Successfully login" })
+                return jsonify({ "result": user.id })
             else:
                 return jsonify({ "result": "Incorrect password, try again." })
         else:
@@ -45,7 +45,7 @@ def apiRegister():
             db.session.add(new_user)
             db.session.commit()
             # login_user(new_user, remember=True)
-            return jsonify({ "result": "Account created" })
+            return jsonify({ "result": new_user.id })
 
     return jsonify({ "result": "test api register result" })
 
