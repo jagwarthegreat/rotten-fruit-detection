@@ -103,3 +103,19 @@ def detects():
             price=price_to_text(fruit_information["price"])
         )
     return render_template("detect.html", user=current_user,display_style="display:none;")
+
+@detect.route('/api/detect', methods=['GET', 'POST'])
+def api_detect():
+    if request.method == "POST":
+        img_file = request.form.get('img_file')
+        decoded_img_data = base64.b64decode((img_file))
+        cv_image = imdecode_image(decoded_img_data)
+        fruit_information = recognize_fruit_by_cv_image(cv_image)
+        # TODO: change freshness_level to freshness_percentage
+        freshness_percentage = fruit_information["freshness_level"]
+
+        return jsonify({
+            "result":{
+                "freshness_percentage": freshness_percentage
+            }
+        })
