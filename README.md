@@ -1,4 +1,4 @@
-# ROTTEN FRUIT DETECTION [BACKEND]
+# Fruit Grading App using python
 
 Detect rotten fruit using neural network and send the result back to mobile
 
