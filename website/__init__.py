@@ -7,11 +7,15 @@ from werkzeug.utils import secure_filename
 
 db = SQLAlchemy()
 
+UPLOAD_FOLDER = 'website/static/upload/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 def create_app():
     app = Flask(__name__)
     CORS(app)
     app.config['TESTING'] = True
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     # NOTE: if password is present : 'mysql://user:password@host/database'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost/fgs_db'
@@ -28,7 +32,7 @@ def create_app():
     app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(detect, url_prefix='/')
 
-    from .models import User
+    from .models import User, Datasets
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'

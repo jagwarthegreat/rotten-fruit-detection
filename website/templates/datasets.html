@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Datasets{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="page-title"> Datasets </h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Datasets</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="card-box mb-30">
+        <div class="pd-20 d-flex justify-content-between mb-3">
+            <h4 class="text-dark h4">Manage Datasets</h4>
+            <a href="#" class="btn icon icon-left btn-primary btn-sm" data-bs-toggle="modal"
+                data-bs-target="#addDatasetModal">
+                <i class="bi bi-plus-lg"></i>
+                Add Dataset
+            </a>
+        </div>
+        <div class="pb-20">
+            <table id="order-listing" class="table">
+                <thead>
+                    <tr>
+                        <th class="table-plus datatable-nosort">#</th>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th class="datatable-nosort">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dataset in datasets %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td style="width: 80px;">
+                            <img src="{{ dataset.slug }}" alt="dataset_image" style="width: 80px; height: 80px; border-radius: 5px;object-fit: center;">
+                        </td>
+                        <td class="table-plus">{{ dataset.ds_name }}</td>
+                        <td>{{ dataset.ds_grade }}</td>
+                        <td>
+                            <div class="col-sm-12 d-flex justify-content-start">
+                                <button type="submit" class="btn btn-danger me-1 mb-1 py-2" onclick="deleteDs({{dataset.ds_id}})"><i class="mdi mdi-delete btn-icon-prepend"></i> Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addDatasetModal" tabindex="-1" aria-labelledby="addDatasetModalTitle" aria-hidden="true"
+    style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addDatasetModalTitle">Add Dataset</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-x">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Fruit Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="ds_name" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Image <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" name="ds_image" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Freshness </label>
+                                <select class="form-control" id="ds_freshness" name="ds_freshness">
+                                    <option value="fresh">Fresh</option>
+                                    <option value="rotten">Rotten</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
+                        <i class="bx bx-x d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Close</span>
+                    </button>
+
+                    <button type="submit" class="btn btn-primary ml-1">
+                        <i class=" bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Save changes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteDs(dsId) {
+        swal.fire({
+            title: "Are you sure?",
+            text: "Are you sure you want to delete this item?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Yes, delete!",
+            cancelButtonText: "No, cancel!",
+        }).then(function(result) {
+            if (result.value) {
+                fetch("/dataset/destroy", {
+                    method: "POST",
+                    body: JSON.stringify({ dsId: dsId })
+                })
+                    .then(data => data.json())
+                    .then(json => {
+
+                        window.location.href = "/datasets";
+                    })
+            }
+        });
+    }
+</script>
+
+<script src="{{ url_for('static', filename='assets/js/data-table.js') }}"></script>
+{% endblock %}

@@ -13,3 +13,11 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150))
     category = db.Column(db.String(150))
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
+
+class Datasets(db.Model):
+    __tablename__ = 'tbl_datasets'
+    ds_id = db.Column(db.Integer, primary_key=True)
+    ds_name = db.Column(db.String(150))
+    ds_grade = db.Column(db.Text())
+    slug = db.Column(db.Text())
+    date_added = db.Column(db.DateTime(timezone=True), default=func.now())
