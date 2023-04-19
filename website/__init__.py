@@ -26,11 +26,13 @@ def create_app():
     from .auth import auth
     from .api import api
     from .detect import detect
+    from .svm_algo import svm_algo
 
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
     app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(detect, url_prefix='/')
+    app.register_blueprint(svm_algo, url_prefix='/')
 
     from .models import User, Datasets
 

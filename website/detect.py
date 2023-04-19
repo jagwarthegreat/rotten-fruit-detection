@@ -104,7 +104,7 @@ def detects():
         )
     return render_template("detect.html", user=current_user,display_style="display:none;")
 
-@detect.route('/api/detect', methods=['GET', 'POST'])
+@detect.route('/api/detect2', methods=['GET', 'POST'])
 def api_detect():
     if request.method == "POST":
         img_file = request.form.get('img_file')

@@ -31,7 +31,8 @@ def datasets():
 
         if file and allowed_file(file.filename):
             now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            new_upload_folder = UPLOAD_FOLDER+ds_freshness+"/"
+            new_upload_folder = UPLOAD_FOLDER+ds_freshness+"/"+ds_name.lower()+"/"
+            os.makedirs(os.path.dirname(new_upload_folder), exist_ok=True)
 
             filename = secure_filename(file.filename)
             file_extension = filename.rsplit('.', 1)[-1]

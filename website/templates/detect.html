@@ -17,29 +17,31 @@
         <div class="card card-box">
             <div class="card-header">Detect Fruits Grade</div>
             <div class="card-body">
-              <div class="row">
-                <div class="col-md-6">
-                  <form class="form form-horizontal" method="post" enctype="multipart/form-data" action="/detect">
-                      <div class="row">
-                          <div class="col-md-4">
-                              <label>Fruit Image</label>
-                          </div>
-                          <div class="col-md-8 form-group">
-                            <input autofocus type="file" id="image" name="image" class="form-control" accept="image/*" capture required autofocus/>
-                          </div>
-                          <div class="col-sm-12 d-flex justify-content-end">
-                              <button type="submit" class="btn btn-primary me-1 mb-1">Save Changes</button>
-                          </div>
-                      </div>
-                  </form>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form class="form form-horizontal" method="post" enctype="multipart/form-data"
+                            action="/svm/detect">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>Fruit Image</label>
+                                </div>
+                                <div class="col-md-8 form-group">
+                                    <input autofocus type="file" id="image" name="image" class="form-control"
+                                        accept="image/*" capture required autofocus />
+                                </div>
+                                <div class="col-sm-12 d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary me-1 mb-1">Save Changes</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-6" style="{{display_style}}">
+                        <img class="mb-4" src="{{base64_image}}" alt="submitted image" width="100%">
+                        <h4 class="mb-3 fw-normal">
+                            <div>Fruit Grade is : ({{freshness_label}})</div>
+                        </h4>
+                    </div>
                 </div>
-                <div class="col-md-6" style="{{display_style}}">
-                    <img class="mb-4" src="{{base64_image}}" alt="submitted image" width="100%">
-                    <h4 class="mb-3 fw-normal">
-                    <div>Fruit Grade is : {{freshness_percentage}}% ({{freshness_label}})</div>
-                  </h4>
-                </div>
-              </div>
             </div>
         </div>
     </div>
