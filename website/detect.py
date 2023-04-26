@@ -108,8 +108,14 @@ def detects():
 def api_detect():
     if request.method == "POST":
         img_file = request.form.get('img_file')
-        decoded_img_data = base64.b64decode((img_file))
-        cv_image = imdecode_image(decoded_img_data)
+        bytes_data = base64.b64decode(img_file)
+
+        # Convert bytes to NumPy array
+        np_data = np.frombuffer(bytes_data, dtype=np.uint8)
+
+        # Convert NumPy array to cv_image object
+        cv_image = cv2.imdecode(np_data, cv2.IMREAD_UNCHANGED)
+        # cv_image = imdecode_image(decoded_img_data)
         fruit_information = recognize_fruit_by_cv_image(cv_image)
         # TODO: change freshness_level to freshness_percentage
         freshness_percentage = fruit_information["freshness_level"]

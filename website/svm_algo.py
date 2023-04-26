@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, Response
 from flask_login import login_required, current_user
 import json
 
@@ -99,7 +99,7 @@ def get_model():
 	# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
 
 	# Train SVM model
-	clf = svm.SVC(kernel='linear')
+	clf = svm.SVC(kernel='linear',probability=True)
 	clf.fit(X_train, y_train)
 
 	return clf,directories
@@ -116,9 +116,7 @@ def svm_detects():
         X = []
         X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
         X_test = np.array(X)
-        clf,directories = get_model()
-        y_pred = clf.predict(X_test)
-        result = directories[y_pred[0]]['name']
+        result = detect_results(X_test)
 
         _, buffer = cv2.imencode('.jpg', images)
         img_str = base64.b64encode(buffer).decode()
@@ -137,23 +135,68 @@ def svm_api_detects():
     if request.method == "POST":
     	img_file = request.form.get('img_file')
     	byte_str = base64.b64decode(img_file)
-    	np_arr = np.frombuffer(byte_str, np.uint8)
-    	images = cv2.imdecode(nparr,cv2.IMREAD_COLOR)
+    	np_data = np.frombuffer(byte_str,dtype=np.uint8)
+    	images = cv2.imdecode(np_data, cv2.IMREAD_UNCHANGED)
+
     	for_images = cv2.resize(images, (100, 100))
     	X = []
     	X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
     	X_test = np.array(X)
-    	clf,directories = get_model()
-    	y_pred = clf.predict(X_test)
-    	result = directories[y_pred[0]]['name']
+    	result = detect_results(X_test)
     	return jsonify({
     		"result":{
     			"freshness_percentage": result
     		}
     	})
     return ''
+def detect_results(X_test):
+	clf,directories = get_model()
+	y_pred = clf.predict(X_test)
+	y_prob = clf.predict_proba(X_test)
+	for i in range(len(X_test)):
+		result = directories[y_pred[0]]['name'] + ' - {:.2f}%'.format(y_prob[i][clf.predict([X_test[i]])[0]] * 100)
+	return result
+
+def predict_results(X_test,clf,directories):
+	y_pred = clf.predict(X_test)
+	y_prob = clf.predict_proba(X_test)
+	for i in range(len(X_test)):
+		result = directories[y_pred[0]]['name'] + ' - {:.2f}%'.format(y_prob[i][clf.predict([X_test[i]])[0]] * 100)
+	return result
+
 def imdecode_image(image_file):
     return cv2.imdecode(
         np.frombuffer(image_file.read(), np.uint8),
         cv2.IMREAD_UNCHANGED
     )
+
+def generate_frames(clf, directories):
+	cap = cv2.VideoCapture(1)
+	while True:
+		result = ""
+		ret, frame = cap.read()
+
+		for_images = cv2.resize(frame, (100, 100))
+		X = []
+		X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
+		X_test = np.array(X)
+		result = predict_results(X_test,clf,directories)
+
+		cv2.rectangle(frame, (0,0), (300, 40), (245, 117, 16), -1)
+		cv2.putText(frame,"Output: - " + result, (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+		ret,buffer=cv2.imencode('.jpg',frame)
+		frame=buffer.tobytes()
+
+		yield(b'--frame\r\n'
+		       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+	cap.release()
+
+@svm_algo.route('/video', methods=['GET', 'POST'])
+def svm_video():
+	clf,directories = get_model()
+	return Response(generate_frames(clf,directories),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@svm_algo.route('/live', methods=['GET', 'POST'])
+def svm_live():
+    return render_template("video.html")
