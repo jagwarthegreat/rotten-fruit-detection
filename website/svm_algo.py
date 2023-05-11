@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 from sklearn.model_selection import train_test_split
 from sklearn import svm
+import joblib
 
 import base64
 
@@ -15,7 +16,11 @@ import os
 import imghdr
 
 svm_algo = Blueprint('svm_algo', __name__)
-
+def extract_features(img):
+	return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).flatten()
+    # hog = cv2.HOGDescriptor((64,64), (16,16), (8,8), (8,8), 9)
+    # hist = hog.compute(img)
+    # return hist.flatten()
 @svm_algo.route('/svm/model', methods=['GET', 'POST'])
 def svm_model():
 	# Load data
@@ -27,7 +32,7 @@ def svm_model():
 
 	datasets = db.session.query(Datasets.ds_name, Datasets.ds_grade).group_by(Datasets.ds_name, Datasets.ds_grade).all()
 	directories = [{'name': ds_grade + ' ' + ds_name , 'folder' : current_dir+ds_grade+'\\'+ds_name.lower()} for ds_name, ds_grade in datasets]
-
+	directories.append({'name': 'Unknown Fruit', 'folder':current_dir+'unknown'})
 	print_ = []
 	for index,folder in enumerate(directories):
 		print(f"Images in {folder['name']}:")
@@ -38,8 +43,8 @@ def svm_model():
 				filetype = imghdr.what(filepath)
 				if filetype:
 					images = cv2.imread(filepath)
-					for_images = cv2.resize(images, (100, 100))
-					X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
+					for_images = cv2.resize(images, (64, 64))
+					X.append(extract_features(for_images))
 					y.append(index)
 					print_.append(f"{filename} is an image file of type {filetype}")
 				else:
@@ -50,8 +55,8 @@ def svm_model():
 	X = []
 	filepath = current_dir + '\\rotten\\durian\\Durian_20230419113006.png'
 	images = cv2.imread(filepath)
-	for_images = cv2.resize(images, (100, 100))
-	X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
+	for_images = cv2.resize(images, (64, 64))
+	X.append(extract_features(for_images))
 
 	X_test = np.array(X)
 
@@ -68,8 +73,11 @@ def svm_model():
 	# accuracy = clf.score(X_test, y_test)
 
 	return jsonify(result)
+@svm_algo.route('/svm/save_model', methods=['GET', 'POST'])
+def svm_save_model():
+	save_model()
 
-def get_model():
+def save_model():
 	# Load data
 	current_dir = os.getcwd()
 	current_dir += '\\website\\static\\upload\\'
@@ -89,8 +97,8 @@ def get_model():
 				filetype = imghdr.what(filepath)
 				if filetype:
 					images = cv2.imread(filepath)
-					for_images = cv2.resize(images, (100, 100))
-					X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
+					for_images = cv2.resize(images, (64, 64))
+					X.append(extract_features(for_images))
 					y.append(index)
 	X_train = np.array(X)
 	y_train = np.array(y)
@@ -102,6 +110,53 @@ def get_model():
 	clf = svm.SVC(kernel='linear',probability=True)
 	clf.fit(X_train, y_train)
 
+	joblib.dump(clf, 'svm_model.joblib')
+def get_model():
+	# Load data
+	current_dir = os.getcwd()
+	current_dir += '\\website\\static\\upload\\'
+
+	X = []
+	y = []
+
+	datasets = db.session.query(Datasets.ds_name, Datasets.ds_grade).group_by(Datasets.ds_name, Datasets.ds_grade).all()
+	directories = [{'name': ds_grade + ' ' + ds_name , 'folder' : current_dir+ds_grade+'\\'+ds_name.lower()} for ds_name, ds_grade in datasets]
+	directories.append({'name': 'Unknown Fruit', 'folder':current_dir+'unknown'})
+	print_ = []
+	for index,folder in enumerate(directories):
+		print(f"Images in {folder['name']}:")
+		directory = folder['folder']
+		for filename in os.listdir(directory):
+			filepath = os.path.join(directory, filename)
+			if os.path.isfile(filepath):
+				filetype = imghdr.what(filepath)
+				if filetype:
+					images = cv2.imread(filepath)
+					for_images = cv2.resize(images, (64, 64))
+					X.append(extract_features(for_images))
+					y.append(index)
+	X_train = np.array(X)
+	y_train = np.array(y)
+
+	# Train SVM model
+	clf = svm.SVC(kernel='linear',probability=True)
+	clf.fit(X_train, y_train)
+	return clf,directories
+def get_model_joblib():
+	# Load data
+	current_dir = os.getcwd()
+	current_dir += '\\website\\static\\upload\\'
+
+	X = []
+	y = []
+
+	datasets = db.session.query(Datasets.ds_name, Datasets.ds_grade).group_by(Datasets.ds_name, Datasets.ds_grade).all()
+	directories = [{'name': ds_grade + ' ' + ds_name , 'folder' : current_dir+ds_grade+'\\'+ds_name.lower()} for ds_name, ds_grade in datasets]
+
+	# Train SVM model
+	clf = svm.SVC(kernel='linear',probability=True)
+	clf = joblib.load('svm_model.joblib')
+
 	return clf,directories
 
 @svm_algo.route('/svm/detect', methods=['GET', 'POST'])
@@ -111,10 +166,10 @@ def svm_detects():
         file_data = cv_image.read()
         nparr = np.fromstring(file_data,np.uint8)
         images = cv2.imdecode(nparr,cv2.IMREAD_COLOR)
-        for_images = cv2.resize(images, (100, 100))
+        for_images = cv2.resize(images, (64, 64))
 
         X = []
-        X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
+        X.append(extract_features(for_images))
         X_test = np.array(X)
         result = detect_results(X_test)
 
@@ -138,9 +193,9 @@ def svm_api_detects():
     	np_data = np.frombuffer(byte_str,dtype=np.uint8)
     	images = cv2.imdecode(np_data, cv2.IMREAD_UNCHANGED)
 
-    	for_images = cv2.resize(images, (100, 100))
+    	for_images = cv2.resize(images, (64, 64))
     	X = []
-    	X.append(cv2.cvtColor(for_images, cv2.COLOR_BGR2GRAY).flatten())
+    	X.append(extract_features(for_images))
     	X_test = np.array(X)
     	result = detect_results(X_test)
     	return jsonify({
@@ -153,6 +208,8 @@ def detect_results(X_test):
 	clf,directories = get_model()
 	y_pred = clf.predict(X_test)
 	y_prob = clf.predict_proba(X_test)
+	if directories[y_pred[0]]['name'] == "Unknown Fruit":
+		return "Unknown Fruit"
 	for i in range(len(X_test)):
 		result = directories[y_pred[0]]['name'] + ' - {:.2f}%'.format(y_prob[i][clf.predict([X_test[i]])[0]] * 100)
 	return result
@@ -171,7 +228,7 @@ def imdecode_image(image_file):
     )
 
 def generate_frames(clf, directories):
-	cap = cv2.VideoCapture(1)
+	cap = cv2.VideoCapture(0)
 	while True:
 		result = ""
 		ret, frame = cap.read()
@@ -182,6 +239,26 @@ def generate_frames(clf, directories):
 		X_test = np.array(X)
 		result = predict_results(X_test,clf,directories)
 
+		# # Convert image to grayscale
+		# gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		# # Apply a threshold to the image
+		# thresh = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY)[1]
+		# # Find contours in the thresholded image
+		# contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		# # Iterate through the contours
+		# for contour in contours:
+		# 	# Filter out small contours
+		# 	if cv2.contourArea(contour) < 100:
+		# 		continue
+		# 	# Compute area and perimeter of contour
+		# 	area = cv2.contourArea(contour)
+		# 	perimeter = cv2.arcLength(contour, True)
+		# 	# Compute circularity of contour
+		# 	circularity = 4*np.pi*area/(perimeter**2)
+		# 	# If circularity is below threshold, draw bounding box on image
+		# 	if circularity < 0.5:
+		# 		x, y, w, h = cv2.boundingRect(contour)
+		# 		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
 		cv2.rectangle(frame, (0,0), (300, 40), (245, 117, 16), -1)
 		cv2.putText(frame,"Output: - " + result, (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
