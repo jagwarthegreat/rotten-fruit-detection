@@ -283,18 +283,21 @@ def svm_video():
 def svm_live():
     return render_template("video.html")
 
-@svm_algo.route('/api/scanned_fruits', methods=['GET'])
+@svm_algo.route('/api/scanned_fruits', methods=['GET','POST'])
 def get_scanned_fruits():
-	results = ScannedFruits.get_scanned_fruits_with_user_fullname()
-	scanned_fruits = []
-	for scanned_fruit, fname, mname, lname in results:
-		scanned_fruit_data = {
-			"scan_id": scanned_fruit.scan_id,
-			"scan_img": scanned_fruit.scan_img,
-			"fruit_grade": scanned_fruit.fruit_grade,
-			"date_added": scanned_fruit.date_added,
-			"user_id": scanned_fruit.user_id,
-			"user_fullname": f"{fname} {mname} {lname}"
-		}
-		scanned_fruits.append(scanned_fruit_data)
-	return jsonify(scanned_fruits)
+	if request.method == "POST":
+		user_id = request.form.get('user_id')
+		results = ScannedFruits.get_scanned_fruits_with_user_fullname(user_id)
+		scanned_fruits = []
+		for scanned_fruit, fname, mname, lname in results:
+			scanned_fruit_data = {
+				"scan_id": scanned_fruit.scan_id,
+				"scan_img": scanned_fruit.scan_img,
+				"fruit_grade": scanned_fruit.fruit_grade,
+				"date_added": scanned_fruit.date_added,
+				"user_id": scanned_fruit.user_id,
+				"user_fullname": f"{fname} {mname} {lname}"
+			}
+			scanned_fruits.append(scanned_fruit_data)
+		return jsonify(scanned_fruits)
+	return jsonify([])

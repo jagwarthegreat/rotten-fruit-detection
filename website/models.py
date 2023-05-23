@@ -36,6 +36,9 @@ class ScannedFruits(db.Model):
         db.session.add(new_fruit)
         db.session.commit()
     @classmethod
-    def get_scanned_fruits_with_user_fullname(cls):
-        return db.session.query(ScannedFruits, User.fname, User.mname, User.lname).\
-            join(User, ScannedFruits.user_id == User.id).all()
+    def get_scanned_fruits_with_user_fullname(cls,user_id=None):
+        query = db.session.query(ScannedFruits, User.fname, User.mname, User.lname).\
+            join(User, ScannedFruits.user_id == User.id)
+        if user_id is not None:
+            query = query.filter(ScannedFruits.user_id == user_id)
+        return query.all()
