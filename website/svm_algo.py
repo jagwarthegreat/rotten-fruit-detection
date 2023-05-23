@@ -283,7 +283,7 @@ def svm_video():
 def svm_live():
     return render_template("video.html")
 
-@svm_algo.route('/scanned_fruits', methods=['GET'])
+@svm_algo.route('/api/scanned_fruits', methods=['GET'])
 def get_scanned_fruits():
 	results = ScannedFruits.get_scanned_fruits_with_user_fullname()
 	scanned_fruits = []
