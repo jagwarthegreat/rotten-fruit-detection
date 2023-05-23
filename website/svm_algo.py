@@ -10,7 +10,7 @@ import joblib
 
 import base64
 
-from .models import User, Datasets
+from .models import User, Datasets, ScannedFruits
 from . import db
 import os
 import imghdr
@@ -175,6 +175,8 @@ def svm_detects():
 
         _, buffer = cv2.imencode('.jpg', images)
         img_str = base64.b64encode(buffer).decode()
+        if result != "Unknown Fruit":
+        	ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result)
 
         return render_template(
             "detect.html",
@@ -198,6 +200,8 @@ def svm_api_detects():
     	X.append(extract_features(for_images))
     	X_test = np.array(X)
     	result = detect_results(X_test)
+    	if result != "Unknown Fruit":
+        	ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result)
     	return jsonify({
     		"result":{
     			"freshness_percentage": result

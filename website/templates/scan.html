@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Datasets{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h3 class="page-title"> Scanned Fruits </h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Scanned Fruits</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="card-box mb-30">
+        <div class="pd-20 d-flex justify-content-between mb-3">
+            <h4 class="text-dark h4">View Scanned Fruits</h4>
+        </div>
+        <div class="pb-20">
+            <table id="order-listing" class="table">
+                <thead>
+                    <tr>
+                        <th class="table-plus datatable-nosort">#</th>
+                        <th>Image</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dataset in datasets %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td style="width: 80px;">
+                            <img src="data:image/jpg;base64, {{ dataset.scan_img }}" alt="dataset_image"
+                                style="width: 80px; height: 80px; border-radius: 5px;object-fit: center;">
+                        </td>
+                        <td>{{ dataset.fruit_grade }}</td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='assets/js/data-table.js') }}"></script>
+{% endblock %}

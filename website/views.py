@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 import json
 from werkzeug.utils import secure_filename
 import os
-from .models import User, Datasets
+from .models import User, Datasets, ScannedFruits
 from . import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
 import datetime
 
@@ -52,6 +52,10 @@ def datasets():
 
     datasets = Datasets.query.all()
     return render_template("datasets.html", user=current_user, datasets=datasets)
+@views.route('/scan', methods=['GET', 'POST'])
+def scan():
+    datasets = ScannedFruits.query.all()
+    return render_template("scan.html", user=current_user, datasets=datasets)
 
 @views.route('/dataset/destroy', methods=['POST'])
 @login_required
