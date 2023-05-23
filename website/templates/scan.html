@@ -24,17 +24,21 @@
                         <th class="table-plus datatable-nosort">#</th>
                         <th>Image</th>
                         <th>Grade</th>
+                        <th>Scanned by</th>
+                        <th>Date</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for dataset in datasets %}
+                    {% for scanned_fruit, fname, mname, lname in datasets %}
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td style="width: 80px;">
-                            <img src="data:image/jpg;base64, {{ dataset.scan_img }}" alt="dataset_image"
+                            <img src="data:image/jpg;base64, {{ scanned_fruit.scan_img }}" alt="dataset_image"
                                 style="width: 80px; height: 80px; border-radius: 5px;object-fit: center;">
                         </td>
-                        <td>{{ dataset.fruit_grade }}</td>
+                        <td>{{ scanned_fruit.fruit_grade }}</td>
+                        <td>{{ fname }} {{ mname }} {{ lname }}</td>
+                        <td>{{ scanned_fruit.date_added }}</td>
                     </tr>
                     {% endfor %}
 

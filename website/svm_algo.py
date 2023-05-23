@@ -176,7 +176,7 @@ def svm_detects():
         _, buffer = cv2.imencode('.jpg', images)
         img_str = base64.b64encode(buffer).decode()
         if result != "Unknown Fruit":
-        	ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result)
+        	ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=current_user.id)
 
         return render_template(
             "detect.html",
@@ -191,6 +191,7 @@ def svm_detects():
 def svm_api_detects():
     if request.method == "POST":
     	img_file = request.form.get('img_file')
+    	user_id = request.form.get('user_id')
     	byte_str = base64.b64decode(img_file)
     	np_data = np.frombuffer(byte_str,dtype=np.uint8)
     	images = cv2.imdecode(np_data, cv2.IMREAD_UNCHANGED)
@@ -201,7 +202,7 @@ def svm_api_detects():
     	X_test = np.array(X)
     	result = detect_results(X_test)
     	if result != "Unknown Fruit":
-        	ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result)
+        	ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=user_id)
     	return jsonify({
     		"result":{
     			"freshness_percentage": result
@@ -281,3 +282,19 @@ def svm_video():
 @svm_algo.route('/live', methods=['GET', 'POST'])
 def svm_live():
     return render_template("video.html")
+
+@svm_algo.route('/scanned_fruits', methods=['GET'])
+def get_scanned_fruits():
+	results = ScannedFruits.get_scanned_fruits_with_user_fullname()
+	scanned_fruits = []
+	for scanned_fruit, fname, mname, lname in results:
+		scanned_fruit_data = {
+			"scan_id": scanned_fruit.scan_id,
+			"scan_img": scanned_fruit.scan_img,
+			"fruit_grade": scanned_fruit.fruit_grade,
+			"date_added": scanned_fruit.date_added,
+			"user_id": scanned_fruit.user_id,
+			"user_fullname": f"{fname} {mname} {lname}"
+		}
+		scanned_fruits.append(scanned_fruit_data)
+	return jsonify(scanned_fruits)

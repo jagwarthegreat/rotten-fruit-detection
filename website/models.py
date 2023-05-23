@@ -25,12 +25,17 @@ class Datasets(db.Model):
 class ScannedFruits(db.Model):
     __tablename__ = 'tbl_scanned_fruits'
     scan_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('tbl_user.id'))
     scan_img = db.Column(db.Text())
     fruit_grade = db.Column(db.String(50))
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
 
     @classmethod
-    def add_new_fruit(cls, scan_img, fruit_grade):
-        new_fruit = ScannedFruits(scan_img=scan_img, fruit_grade=fruit_grade)
+    def add_new_fruit(cls, scan_img, fruit_grade, user_id):
+        new_fruit = ScannedFruits(scan_img=scan_img, fruit_grade=fruit_grade, user_id=user_id)
         db.session.add(new_fruit)
         db.session.commit()
+    @classmethod
+    def get_scanned_fruits_with_user_fullname(cls):
+        return db.session.query(ScannedFruits, User.fname, User.mname, User.lname).\
+            join(User, ScannedFruits.user_id == User.id).all()

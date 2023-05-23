@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `tbl_datasets` (
 CREATE TABLE IF NOT EXISTS `tbl_scanned_fruits` (
   `scan_id` int(11) NOT NULL AUTO_INCREMENT,
   `scan_img` text,
+  `user_id` int(11) NOT NULL,
   `fruit_grade` varchar(50) DEFAULT NULL,
   `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`scan_id`)
