@@ -124,7 +124,7 @@ def get_model():
 	directories.append({'name': 'Unknown Fruit', 'folder':current_dir+'unknown'})
 	print_ = []
 	for index,folder in enumerate(directories):
-		print(f"Images in {folder['name']}:")
+		# print(f"Images in {folder['name']}:")
 		directory = folder['folder']
 		for filename in os.listdir(directory):
 			filepath = os.path.join(directory, filename)
@@ -201,8 +201,11 @@ def svm_api_detects():
     	X.append(extract_features(for_images))
     	X_test = np.array(X)
     	result = detect_results(X_test)
+    	_, buffer = cv2.imencode('.jpg', images)
+    	img_str = base64.b64encode(buffer).decode()
+    	print(f"Predicted: {result}")
     	if result != "Unknown Fruit":
-        	ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=user_id)
+    		ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=user_id)
     	return jsonify({
     		"result":{
     			"freshness_percentage": result
