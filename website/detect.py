@@ -125,3 +125,25 @@ def api_detect():
                 "freshness_percentage": freshness_percentage
             }
         })
+
+
+            #img_data = request.json['base64_data']
+     #   img_str = ""
+      #  for i in img_data:
+       #     img_str += i + ""
+
+        # with open('base64_img.txt','w',encoding='utf-8') as f:
+        #     f.writelines(img_data)
+        # return jsonify({"response":img_data})
+        #img = base64.b64decode(img_str)
+        #npimg = np.frombuffer(img, dtype=np.uint8)
+        #src = cv2.imdecode(npimg, cv2.IMREAD_UNCHANGED)
+
+        # img = cv2.imread('qrcode1.png')
+        #det = cv2.QRCodeDetector()
+        #retval, val, points, qrcode = det.detectAndDecodeMulti(src)
+
+        #if points is not None:
+         #   return jsonify({"response":val[0]})
+        #else:
+         #   return jsonify({"response":""})
