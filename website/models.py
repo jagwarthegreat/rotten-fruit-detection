@@ -42,3 +42,12 @@ class ScannedFruits(db.Model):
         if user_id is not None:
             query = query.filter(ScannedFruits.user_id == user_id)
         return query.all()
+    @classmethod
+    def delete_scanned_fruits(cls, scan_ids):
+        fruits = cls.query.filter(ScannedFruits.scan_id.in_(scan_ids)).all()
+        if fruits:
+            for fruit in fruits:
+                db.session.delete(fruit)
+            db.session.commit()
+            return True
+        return False

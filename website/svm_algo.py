@@ -16,6 +16,8 @@ import os
 import imghdr
 
 svm_algo = Blueprint('svm_algo', __name__)
+
+img_file_size = (100,100)
 def extract_features(img):
 	return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).flatten()
     # hog = cv2.HOGDescriptor((64,64), (16,16), (8,8), (8,8), 9)
@@ -43,7 +45,7 @@ def svm_model():
 				filetype = imghdr.what(filepath)
 				if filetype:
 					images = cv2.imread(filepath)
-					for_images = cv2.resize(images, (64, 64))
+					for_images = cv2.resize(images, img_file_size)
 					X.append(extract_features(for_images))
 					y.append(index)
 					print_.append(f"{filename} is an image file of type {filetype}")
@@ -55,7 +57,7 @@ def svm_model():
 	X = []
 	filepath = current_dir + '\\rotten\\durian\\Durian_20230419113006.png'
 	images = cv2.imread(filepath)
-	for_images = cv2.resize(images, (64, 64))
+	for_images = cv2.resize(images, img_file_size)
 	X.append(extract_features(for_images))
 
 	X_test = np.array(X)
@@ -97,7 +99,7 @@ def save_model():
 				filetype = imghdr.what(filepath)
 				if filetype:
 					images = cv2.imread(filepath)
-					for_images = cv2.resize(images, (64, 64))
+					for_images = cv2.resize(images, img_file_size)
 					X.append(extract_features(for_images))
 					y.append(index)
 	X_train = np.array(X)
@@ -132,7 +134,7 @@ def get_model():
 				filetype = imghdr.what(filepath)
 				if filetype:
 					images = cv2.imread(filepath)
-					for_images = cv2.resize(images, (64, 64))
+					for_images = cv2.resize(images, img_file_size)
 					X.append(extract_features(for_images))
 					y.append(index)
 	X_train = np.array(X)
@@ -166,7 +168,7 @@ def svm_detects():
         file_data = cv_image.read()
         nparr = np.fromstring(file_data,np.uint8)
         images = cv2.imdecode(nparr,cv2.IMREAD_COLOR)
-        for_images = cv2.resize(images, (64, 64))
+        for_images = cv2.resize(images, img_file_size)
 
         X = []
         X.append(extract_features(for_images))
@@ -196,7 +198,7 @@ def svm_api_detects():
     	np_data = np.frombuffer(byte_str,dtype=np.uint8)
     	images = cv2.imdecode(np_data, cv2.IMREAD_UNCHANGED)
 
-    	for_images = cv2.resize(images, (64, 64))
+    	for_images = cv2.resize(images, img_file_size)
     	X = []
     	X.append(extract_features(for_images))
     	X_test = np.array(X)
@@ -303,4 +305,13 @@ def get_scanned_fruits():
 			}
 			scanned_fruits.append(scanned_fruit_data)
 		return jsonify(scanned_fruits)
+	return jsonify([])
+
+@svm_algo.route('/api/delete_scanned_fruits', methods=['GET','POST'])
+def delete_scanned_fruits():
+	if request.method == "POST":
+		user_id = request.form.get('user_id')
+		scan_ids = request.form.get('scan_ids')
+		result = ScannedFruits.delete_scanned_fruits(scan_ids)
+		return jsonify({"deleted": result})
 	return jsonify([])
