@@ -309,9 +309,10 @@ def get_scanned_fruits():
 
 @svm_algo.route('/api/delete_scanned_fruits', methods=['GET','POST'])
 def delete_scanned_fruits():
-	if request.method == "POST":
+	if request.method == "GET":
 		user_id = request.form.get('user_id')
 		scan_ids = request.form.get('scan_ids')
-		result = ScannedFruits.delete_scanned_fruits(scan_ids)
-		return jsonify({"deleted": result})
+		for scan_id in scan_ids:
+			ScannedFruits.delete_scanned_fruit(scan_id)
+		return jsonify({"deleted": True})
 	return jsonify([])
