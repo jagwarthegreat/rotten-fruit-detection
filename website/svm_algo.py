@@ -18,6 +18,7 @@ import imghdr
 svm_algo = Blueprint('svm_algo', __name__)
 
 img_file_size = (100,100)
+window_name = "Fruit Rotten Detection using SVM"
 def extract_features(img):
 	return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).flatten()
     # hog = cv2.HOGDescriptor((64,64), (16,16), (8,8), (8,8), 9)
@@ -227,6 +228,8 @@ def detect_results(X_test):
 def predict_results(X_test,clf,directories):
 	y_pred = clf.predict(X_test)
 	y_prob = clf.predict_proba(X_test)
+	if directories[y_pred[0]]['name'] == "Unknown Fruit":
+		return "Unknown Fruit"
 	for i in range(len(X_test)):
 		result = directories[y_pred[0]]['name'] + ' - {:.2f}%'.format(y_prob[i][clf.predict([X_test[i]])[0]] * 100)
 	return result
@@ -316,3 +319,43 @@ def delete_scanned_fruits():
 			ScannedFruits.delete_scanned_fruit(scan_id)
 		return jsonify({"deleted": True})
 	return jsonify(scan_ids)
+@svm_algo.route('/live-detect', methods=['GET', 'POST'])
+def detects2():
+	clf,directories = get_model()
+	last_result = ""
+	cap=cv2.VideoCapture(0)
+	while True:
+		# Read the frame from the capture
+		ret, frame = cap.read()
+
+		if frame is not None:
+			# Show the frame
+			result = process_frame(frame,clf,directories,last_result)
+			last_result = result
+			if cv2.waitKey(1) == ord("q"):
+				break
+		else:
+			cap.release()
+			cv2.destroyAllWindows()
+			flash('Please check your camera connection!', category='error')
+			return render_template("detect.html", user=current_user,display_style="display:none;")
+	# Release the capture and destroy the windows
+	cap.release()
+	cv2.destroyAllWindows()
+	return render_template("detect.html", user=current_user,display_style="display:none;")
+
+def process_frame(frame,clf,directories,last_result):
+	for_images = cv2.resize(frame, img_file_size)
+	X = []
+	X.append(extract_features(for_images))
+	X_test = np.array(X)
+	result = predict_results(X_test,clf,directories)
+	_, buffer = cv2.imencode('.jpg', frame)
+	img_str = base64.b64encode(buffer).decode()
+
+	if result != "Unknown Fruit" & last_result != result:
+		ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=user_id)
+	cv2.putText(frame,result,(10,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2)
+	cv2.imshow(window_name,frame)
+	cv2.setWindowProperty(window_name,cv2.WND_PROP_TOPMOST,1)
+	return result
