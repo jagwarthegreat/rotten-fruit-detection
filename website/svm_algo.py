@@ -353,9 +353,37 @@ def process_frame(frame,clf,directories,last_result):
 	_, buffer = cv2.imencode('.jpg', frame)
 	img_str = base64.b64encode(buffer).decode()
 
-	if result != "Unknown Fruit" & last_result != result:
-		ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=user_id)
-	cv2.putText(frame,result,(10,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2)
+	# if result != "Unknown Fruit":
+	# ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=current_user.id)
+	# cv2.putText(frame,result,(10,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2)
+	cv2.rectangle(frame, (0,0), (650, 40), (245, 117, 16), -1)
+	cv2.putText(frame,result, (3,30),cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 	cv2.imshow(window_name,frame)
 	cv2.setWindowProperty(window_name,cv2.WND_PROP_TOPMOST,1)
 	return result
+def process_frame_contours(frame,clf,directories,last_result):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Apply image preprocessing (Gaussian blur and thresholding)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    _, threshold = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY_INV)
+
+    # Find contours in the thresholded image
+    contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Iterate over each contour and draw a bounding box around it
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        fruit_img = frame[y:y + h, x:x + w]
+        for_images = cv2.resize(fruit_img, img_file_size)
+        X = []
+        X.append(extract_features(for_images))
+        X_test = np.array(X)
+        result = predict_results(X_test,clf,directories)
+        _, buffer = cv2.imencode('.jpg', frame)
+        img_str = base64.b64encode(buffer).decode()
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.putText(frame, result, (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    cv2.imshow(window_name,frame)
+    cv2.setWindowProperty(window_name,cv2.WND_PROP_TOPMOST,1)
+    return result
