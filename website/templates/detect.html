@@ -12,6 +12,27 @@
     </nav>
 </div>
 
+<div class="row pb-2">
+    <div class="col-md-6 col-6">
+        <div class="card card-box">
+            <div class="card-header">Fruits Grade Live Detection</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <form class="form form-horizontal" method="post" action="/live-detect">
+                            <div class="row">
+                                <div class="col-sm-12 d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-success me-1 mb-1"><span
+                                            class="fa fa-search"></span> Live Detection</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-12 col-12">
         <div class="card card-box">
@@ -34,13 +55,6 @@
                                 </div>
                             </div>
                         </form>
-                        <form class="form form-horizontal" method="post" action="/live-detect">
-                            <div class="row">
-                                <div class="col-sm-12 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary me-1 mb-1">Live Detection</button>
-                                </div>
-                            </div>
-                        </form>
                     </div>
                     <div class="col-md-6" style="{{display_style}}">
                         <img class="mb-4" src="{{base64_image}}" alt="submitted image" width="100%">
@@ -53,4 +67,6 @@
         </div>
     </div>
 </div>
+
+
 {% endblock %}

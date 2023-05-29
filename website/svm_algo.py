@@ -331,6 +331,7 @@ def detects2():
 		if frame is not None:
 			# Show the frame
 			result = process_frame(frame,clf,directories,last_result)
+			print("Last:"+last_result+" Current:"+result)
 			last_result = result
 			if cv2.waitKey(1) == ord("q"):
 				break
@@ -338,11 +339,11 @@ def detects2():
 			cap.release()
 			cv2.destroyAllWindows()
 			flash('Please check your camera connection!', category='error')
-			return render_template("detect.html", user=current_user,display_style="display:none;")
+			return redirect(url_for('detect.detects'))
 	# Release the capture and destroy the windows
 	cap.release()
 	cv2.destroyAllWindows()
-	return render_template("detect.html", user=current_user,display_style="display:none;")
+	return redirect(url_for('detect.detects'))
 
 def process_frame(frame,clf,directories,last_result):
 	for_images = cv2.resize(frame, img_file_size)
@@ -353,8 +354,9 @@ def process_frame(frame,clf,directories,last_result):
 	_, buffer = cv2.imencode('.jpg', frame)
 	img_str = base64.b64encode(buffer).decode()
 
-	# if result != "Unknown Fruit":
-	# ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=current_user.id)
+	if result != "Unknown Fruit":
+		if sameLastResult(last_result,result) != True:
+			ScannedFruits.add_new_fruit(scan_img=img_str, fruit_grade=result, user_id=current_user.id)
 	# cv2.putText(frame,result,(10,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2)
 	cv2.rectangle(frame, (0,0), (650, 40), (245, 117, 16), -1)
 	cv2.putText(frame,result, (3,30),cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
@@ -387,3 +389,9 @@ def process_frame_contours(frame,clf,directories,last_result):
     cv2.imshow(window_name,frame)
     cv2.setWindowProperty(window_name,cv2.WND_PROP_TOPMOST,1)
     return result
+def sameLastResult(last,current):
+	exploded_last = last.split()
+	exploded_current = current.split()
+	new_last = exploded_last[0] + " " + exploded_last[1]
+	new_current = exploded_current[0] + " " + exploded_current[1]
+	return new_current == new_last

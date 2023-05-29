@@ -83,25 +83,25 @@ def recognize_fruit_by_cv_image(cv_image):
 
 @detect.route('/detect', methods=['GET', 'POST'])
 def detects():
-    if request.method == "POST":
-        cv_image = imdecode_image(request.files["image"])
-        fruit_information = recognize_fruit_by_cv_image(cv_image)
-        # TODO: change freshness_level to freshness_percentage
-        freshness_percentage = fruit_information["freshness_level"]
+    # if request.method == "POST":
+    #     cv_image = imdecode_image(request.files["image"])
+    #     fruit_information = recognize_fruit_by_cv_image(cv_image)
+    #     # TODO: change freshness_level to freshness_percentage
+    #     freshness_percentage = fruit_information["freshness_level"]
 
-        # show submitted image
-        image_content = cv2.imencode('.jpg', cv_image)[1].tobytes()
-        encoded_image = base64.encodebytes(image_content)
-        base64_image = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
-        return render_template(
-            "detect.html",
-            display_style="display:block;",
-            user=current_user,
-            freshness_percentage=freshness_percentage,
-            freshness_label=freshness_label(freshness_percentage),
-            base64_image=base64_image,
-            price=price_to_text(fruit_information["price"])
-        )
+    #     # show submitted image
+    #     image_content = cv2.imencode('.jpg', cv_image)[1].tobytes()
+    #     encoded_image = base64.encodebytes(image_content)
+    #     base64_image = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
+    #     return render_template(
+    #         "detect.html",
+    #         display_style="display:block;",
+    #         user=current_user,
+    #         freshness_percentage=freshness_percentage,
+    #         freshness_label=freshness_label(freshness_percentage),
+    #         base64_image=base64_image,
+    #         price=price_to_text(fruit_information["price"])
+    #     )
     return render_template("detect.html", user=current_user,display_style="display:none;")
 
 @detect.route('/api/detect2', methods=['GET', 'POST'])
